@@ -4,7 +4,8 @@ import {
     getAllLorem,
     getLoremById,
     getLoremByName,
-    updateLoremById
+    updateLoremById,
+    createLorem
 } from '../controller'
 
 const router = Router();
@@ -12,6 +13,7 @@ const router = Router();
 router.get("/", (req, res) => {
   res.json("Hello world");
 });
+router.post('/person', createLorem);
 router.get('/person', getAllLorem);
 router.get('/person/id/:id', getLoremById);
 router.get('/person/name/:name', getLoremByName);

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import multer from "multer";
 import router from "./routes";
+import { corsMiddleware } from "./middlewares/cors";
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use(
     stream: accessLogStream,
   })
 );
+app.use(corsMiddleware())
 app.use(router);
 
 app.post("/upload", upload.array("file"), (req, res) => {

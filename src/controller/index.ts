@@ -1,14 +1,16 @@
 import { Request, Response } from "express";
 import db from "../../db/client";
 import { faker } from "@faker-js/faker";
+import { validatePerson } from "../schema/person";
 
 export const createLorem = (req: Request, res: Response) => {
-  const { person } = req.body;
+  
 
-  console.log(person);
+  const result = validatePerson(req.body);
 
-  if (!person.id)
-    return res.status(400).json("A valid person must be provided!");
+  if (!result.success) return res.status(400).json(result.error.issues);
+
+  console.log(result.data);
 
   const stmt = db.prepare("INSERT INTO lorem VALUES (?, ?)");
 
@@ -16,10 +18,10 @@ export const createLorem = (req: Request, res: Response) => {
     id: faker.number.int({
       min: 1,
     }),
-    name: person.name,
+    name: result.data.name,
   };
 
-  stmt.run(personToSave.id, person.name);
+  stmt.run(personToSave.id, result.data.name);
 
   return res.status(201).json(personToSave);
 };
@@ -36,12 +38,12 @@ export const getAllLorem = (req: Request, res: Response) => {
 
 export const getLoremById = (req: Request, res: Response) => {
   const id = req.params.id;
-  
+
   db.get(`SELECT * FROM lorem WHERE id = ?`, [id], (err, row) => {
     if (err) {
       return res.status(500).json({ message: err.message });
     }
-    
+
     res.json(row);
   });
 };
@@ -85,7 +87,6 @@ export const deleteLoremById = (req: Request, res: Response) => {
   console.log(id);
 
   if (!id) return res.status(400).json("An ID must be provided!");
-  
   else
     db.all(`DELETE FROM lorem WHERE id = ?`, [id], (err) => {
       if (err) return res.status(500).json({ message: err.message });
